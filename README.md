@@ -1,138 +1,183 @@
-Skrip ini masih dalam tahap pengembangan dan belum sempurna. Kami sangat menghargai kontribusi Anda melalui Pull Request untuk menambahkan payload atau mendukung lebih banyak perangkat. Jika proyek ini bermanfaat bagi Anda, jangan lupa berikan tanda bintang (Star) sebagai bentuk dukungan.
+📋 Tentang Proyek
+Proyek ini memungkinkan Anda untuk menjalankan ramdisk kustom pada iPhone XR dan mendapatkan akses shell penuh melalui SSH. Dibangun di atas fondasi riset luar biasa dari prdgmshift/usbliter8, skrip ini mengotomatiskan seluruh proses booting dari mode pwned DFU hingga shell SSH.
 
-Proyek ini memungkinkan Anda untuk menjalankan ramdisk kustom pada iPhone XR dan mengakses shell melalui usbmux / SSH.
+Catatan: Skrip masih dalam tahap pengembangan. Kontribusi berupa Pull Request untuk menambahkan payload atau mendukung perangkat lain sangat kami nantikan! ⭐ Jangan lupa beri bintang jika proyek ini bermanfaat.
+```
+🎯 Target Perangkat
+Komponen	Detail
+Perangkat	iPhone XR
+Board	n841ap
+Alur Boot	pwned DFU → iBSS → Recovery → Ramdisk → SSH
+```
+🔧 Persyaratan Perangkat Keras
+```
+Board Pengembangan PR2350-A
 
-Teknologi dasar yang digunakan berasal dari prdgmshift/usbliter8. tools/usbliter8ctl berfungsi untuk menjalankan payload/iBSS.raw dari mode pwned DFU, kemudian exploit.sh melanjutkan proses dengan mengirimkan firmware, DeviceTree, ramdisk, trustcache, dan kernelcache melalui irecovery.
+iPhone XR (perangkat target)
 
-https://assets/ssh-ramdisk.png
-
-Target Perangkat
-Perangkat: iPhone XR
-
-Board: n841ap
-
-Alur boot: pwned DFU -> iBSS -> Recovery -> ramdisk boot -> SSH
-
-Persyaratan Perangkat Keras
-Board pengembangan PR2350-A
-
-iPhone XR
-
-Kabel USB
+Kabel USB yang mendukung transfer data
 
 Komputer dengan sistem operasi macOS atau Linux
+```
 
-Sebelum menjalankan skrip, pastikan Anda telah menggunakan PR2350-A bersama alur usbliter8 untuk memasukkan perangkat ke mode pwned DFU.
-
-Dependensi Perangkat Lunak
+💻 Persyaratan Perangkat Lunak
+Dependensi Utama
+```
 python3
-
-Paket Python: pyusb
-
-irecovery
-
-iproxy
-
-idevice_id
-
-sshpass
-
-ssh
-
-Untuk pengguna macOS dengan Homebrew, Anda dapat menginstal dependensi dengan perintah berikut:
-
-bash
+pyusb                     # Python package
+irecovery                 # libirecovery
+iproxy                    # libimobiledevice
+idevice_id                # libimobiledevice
+sshpass                   # Untuk otomatisasi SSH
+ssh                       # Koneksi shell
+Instalasi (macOS + Homebrew)
+```
+# Install dependencies melalui Homebrew
+```
 brew install libirecovery libimobiledevice usbmuxd sshpass
+```
+# Install Python package
 python3 -m pip install pyusb
-Jika sistem Anda melarang instalasi paket Python secara global, Anda dapat menggunakan lingkungan virtual:
+Instalasi dengan Virtual Environment (Opsional)
+Jika sistem Anda membatasi instalasi paket Python secara global:
 
-bash
+```
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install pyusb
-Struktur Berkas
+📁 Struktur Proyek
 text
-exploit.sh                 Skrip utama untuk proses boot
-ssh_connect.sh             Skrip untuk menghubungkan kembali SSH
-tools/usbliter8ctl         Helper lokal berbasis alur USB usbliter8
-payload/iBSS.raw           Raw iBSS yang dimuat dari pwned DFU
-payload/*.img4             Firmware, DeviceTree, ramdisk, trustcache, kernelcache
-assets/ssh-ramdisk.png     Tangkapan layar koneksi SSH berhasil
-Panduan Penggunaan
-Instal semua dependensi yang diperlukan.
+📂 iPhone-XR-Ramdisk-Boot/
+├── 📄 exploit.sh                 # Skrip utama booting
+├── 📄 ssh_connect.sh             # Skrip koneksi ulang SSH
+├── 📂 tools/
+│   └── 📄 usbliter8ctl           # Helper untuk usbliter8
+├── 📂 payload/
+│   ├── 📄 iBSS.raw               # iBSS untuk pwned DFU
+│   ├── 📄 firmware.img4          # Firmware image
+│   ├── 📄 DeviceTree.img4        # DeviceTree
+│   ├── 📄 ramdisk.img4           # Ramdisk custom
+│   ├── 📄 trustcache.img4        # TrustCache
+│   └── 📄 kernelcache.img4       # Kernel Cache
+├── 📂 assets/
+│   └── 🖼️ ssh-ramdisk.png        # Screenshot koneksi
+└── 📂 logs/                      # Log file (auto-generated)
+🚀 Panduan Penggunaan
+Langkah 1: Persiapan
+Pastikan semua dependensi telah terinstal dan perangkat keras terhubung dengan benar.
 
-Hubungkan board PR2350-A dan iPhone XR ke komputer.
+Langkah 2: Masuk ke Mode Pwned DFU
+Gunakan board PR2350-A dengan alur usbliter8 untuk memasukkan iPhone XR ke mode pwned DFU.
 
-Gunakan alur PR2350-A / usbliter8 untuk memasuki mode pwned DFU pada iPhone XR.
-
-Jalankan perintah berikut dari direktori proyek:
-
-bash
+Langkah 3: Jalankan Skrip
+```
+# Berikan izin eksekusi
+```
 chmod +x exploit.sh ssh_connect.sh tools/usbliter8ctl
+```
+# Jalankan skrip utama
+```
 ./exploit.sh
-Proses yang akan dilakukan skrip:
+```
+Apa yang Terjadi di Balik Layar?
+✅ Membuat direktori logs/ untuk menyimpan catatan
 
-Membuat direktori logs/
+✅ Memverifikasi semua file payload yang diperlukan
 
-Memeriksa keberadaan berkas payload yang dibutuhkan
+✅ Menjalankan iBSS.raw dari mode pwned DFU
 
-Menjalankan payload/iBSS.raw
+⏳ Menunggu perangkat memasuki mode Recovery
 
-Menunggu perangkat memasuki mode Recovery
+📤 Mengirim firmware image
 
-Mengirim citra firmware
+📤 Mengirim DeviceTree, Ramdisk, TrustCache, dan KernelCache
 
-Mengirim DeviceTree, ramdisk, trustcache, dan kernelcache
+⚙️ Mengatur boot-args
 
-Mengatur boot-args
+🚀 Menjalankan perintah bootx
 
-Menjalankan bootx
+🔌 Memulai iproxy 2222 22 untuk port forwarding
 
-Memulai iproxy 2222 22 secara lokal
+🔑 Mencoba koneksi SSH sebagai root
 
-Mencoba masuk ke ramdisk melalui SSH sebagai pengguna root
-
-Kata sandi SSH default:
-
+🔑 Koneksi SSH
+Kata Sandi Default
 text
 alpine
-Untuk menghubungkan kembali SSH setelah proses boot:
-
-bash
+Koneksi Otomatis
+```
 ./ssh_connect.sh
-Koneksi manual:
-
-bash
+Koneksi Manual
+```
+# Port forwarding
 iproxy 2222 22
+
+# Koneksi SSH (di terminal terpisah)
 ssh root@localhost -p 2222
-Penggantian Variabel Lingkungan
-Jika alat tidak ditemukan di PATH default, Anda dapat menentukannya melalui variabel lingkungan:
+⚙️ Konfigurasi Lanjutan
+Mengganti PATH Tools
+Jika tools tidak berada di PATH default, gunakan environment variables:
 
-bash
-IRECOVERY=/path/to/irecovery \
-PYTHON=/path/to/python3 \
+```
+IRECOVERY=/custom/path/irecovery \
+PYTHON=/custom/path/python3 \
 USBLITER8CTL=tools/usbliter8ctl \
-IPROXY=/path/to/iproxy \
-SSHPASS=/path/to/sshpass \
+IPROXY=/custom/path/iproxy \
+SSHPASS=/custom/path/sshpass \
+```
+```
 ./exploit.sh
-Pemecahan Masalah
-usbliter8ctl melaporkan perangkat tidak dalam status pwned: Ulangi langkah memasukkan perangkat ke mode pwned DFU menggunakan PR2350-A.
+```
+🐛 Pemecahan Masalah
+Masalah	Solusi
+usbliter8ctl melaporkan perangkat tidak pwned	Ulangi proses pwned DFU dengan PR2350-A
+Timeout menunggu Recovery	Cabut USB, sambungkan kembali, ulangi pwned DFU
+SSH tidak bisa terhubung	Tunggu 5-10 detik, jalankan ./ssh_connect.sh
+Port 2222 sudah digunakan	pkill -f 'iproxy .*2222.*22'
+Permission denied	Pastikan file memiliki izin eksekusi: chmod +x *.sh tools/*
+📚 Alur Boot Diagram
 
-Waktu tunggu Recovery habis (timeout): Cabut dan sambungkan kembali kabel USB, lalu ulangi langkah pwned DFU.
 
-SSH tidak dapat terhubung: Tunggu beberapa saat, lalu jalankan:
 
-bash
-./ssh_connect.sh
-Port lokal 2222 sedang digunakan:
 
-bash
-pkill -f 'iproxy .*2222.*22'
-Ucapan Terima Kasih
-Proyek ini berdasarkan pada prdgmshift/usbliter8.
 
-Terima kasih kepada penulis usbliter8 atas publikasi riset exploit SecureROM A12/A13 yang sangat berharga.
 
-Pernyataan Sanggahan
-Repositori ini disediakan untuk keperluan riset keamanan, riset pemulihan perangkat, dan pengujian pada perangkat yang Anda miliki atau memiliki izin untuk mengujinya. Gunakan dengan penuh tanggung jawab dan patuhi hukum serta peraturan yang berlaku di wilayah Anda.
 
+
+
+
+🙏 Ucapan Terima Kasih
+Proyek ini berdiri di atas pundak para raksasa:
+
+prdgmshift/usbliter8 - Untuk riset exploit SecureROM A12/A13 yang luar biasa
+
+Komunitas Jailbreak - Untuk semangat eksplorasi dan berbagi pengetahuan
+
+⚠️ Pernyataan Sanggahan
+Penting untuk dibaca:
+
+Repositori ini disediakan untuk tujuan edukasi dan riset keamanan semata
+
+Gunakan hanya pada perangkat yang Anda miliki atau memiliki izin resmi
+
+Penulis tidak bertanggung jawab atas kerusakan perangkat atau kehilangan data
+
+Pastikan untuk mematuhi hukum dan peraturan yang berlaku di wilayah Anda
+
+Penggunaan untuk kegiatan ilegal adalah tanggung jawab pengguna sepenuhnya
+
+📝 Kontribusi
+Kami sangat menghargai kontribusi Anda! Silakan:
+
+🍴 Fork repositori ini
+
+🌿 Buat branch fitur baru (git checkout -b fitur-keren)
+
+💾 Commit perubahan Anda (git commit -m 'Menambahkan fitur X')
+
+📤 Push ke branch (git push origin fitur-keren)
+
+🔄 Buka Pull Request
+
+📄 Lisensi
+Proyek ini dilisensikan di bawah MIT License - lihat file LICENSE untuk detail lebih lanjut.
